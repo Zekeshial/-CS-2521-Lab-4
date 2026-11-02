@@ -24,19 +24,23 @@ public class HammingCode {
         }
 
         if (getParity1Sum(list)%2 != 0) {
-            list.add(1, 1);
+            list.remove(0);
+            list.add(0, 1);
         }
 
         if (getParity2Sum(list)%2 != 0) {
-            list.add(2, 1);
+            list.remove(1);
+            list.add(1, 1);
         }
 
         if (getParity4Sum(list)%2 != 0) {
-            list.add(4, 1);
+            list.remove(3);
+            list.add(3, 1);
         }
 
         if (getParity8Sum(list)%2 != 0) {
-            list.add(8, 1);
+            list.remove(7);
+            list.add(7, 1);
         }
 
         return list;

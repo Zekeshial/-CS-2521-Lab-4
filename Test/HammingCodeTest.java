@@ -40,12 +40,11 @@ class HammingCodeTest {
         expected.add(1);
         expected.add(1);
         expected.add(1);
-        System.out.println(expected);
-        //Expected is adding ones and zeros needs to be fixed.
 
 
 
-        assertEquals(actual, expected);
+
+        assertEquals(expected, actual);
     }
 
     @Test

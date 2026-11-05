@@ -8,7 +8,11 @@ public class HammingCode {
     }
 
 
-    public ArrayList<Integer> Encode11Bit() {
+    /**
+     * Encodes the 11 bits of data tha you are given
+     * @return an arraylist of the encoded data
+     */
+    public ArrayList<Integer> encode11Bit() {
 
         ArrayList<Integer> list = new ArrayList<>();
         list.add(0);
@@ -46,6 +50,11 @@ public class HammingCode {
         return list;
     }
 
+    /**
+     * Outdated code that I was going to use to check the total sum of 16 bits of data to seeing if there were 2 errors within 11 bits of data sent.
+     * @param list the 16 bits of data you wish to check.
+     * @return an integer sum of the 16 bits.
+     */
     public int getTotalSum(ArrayList<Integer> list){
         int sum = 0;
         for (Integer i: list) {
@@ -54,18 +63,27 @@ public class HammingCode {
         return sum;
     }
 
+    /**
+     * Checks partiy bit 1 to see what the sum of bits are in that parity. Used in seeing if parity one has an error or what parity 1 needs to be for encoding and decoding hamming code.
+     * @param list list of 15 bits you wish to check.
+     * @return the sum of bits over parity 1 on the 15 bit list.
+     */
     public int getParity1Sum(ArrayList<Integer> list) {
         int sum = 0;
         int index = 0;
-        for (Integer i: list) {
-            if (index%2 != 0) {
-                sum += i;
+        for (int i = index; i <= list.size(); i++) {
+            if (i%2 == 0) {
+                sum += list.get(i);
             }
-            index++;
         }
         return sum;
     }
 
+    /**
+     * Checks partiy bit 2 to see what the sum of bits are in that parity. Used in seeing if parity one has an error or what parity 2 needs to be for encoding and decoding hamming code.
+     * @param list list of 15 bits you wish to check.
+     * @return the sum of bits over parity 2 on the 15 bit list.
+     */
     public int getParity2Sum(ArrayList<Integer> list) {
         int sum = 0;
         int index = 1;
@@ -77,6 +95,11 @@ public class HammingCode {
         return sum;
     }
 
+    /**
+     * Checks partiy bit 4 to see what the sum of bits are in that parity. Used in seeing if parity one has an error or what parity 4 needs to be for encoding and decoding hamming code.
+     * @param list list of 15 bits you wish to check.
+     * @return the sum of bits over parity 4 on the 15 bit list.
+     */
     public int getParity4Sum(ArrayList<Integer> list) {
         int sum = 0;
         int index = 3;
@@ -90,6 +113,11 @@ public class HammingCode {
         return sum;
     }
 
+    /**
+     * Checks partiy bit 8 to see what the sum of bits are in that parity. Used in seeing if parity one has an error or what parity 8 needs to be for encoding and decoding hamming code.
+     * @param list list of 15 bits you wish to check.
+     * @return the sum of bits over parity 8 on the 15 bit list.
+     */
     public int getParity8Sum(ArrayList<Integer> list) {
         int sum = 0;
         int index = 7;
@@ -102,4 +130,102 @@ public class HammingCode {
         }
         return sum;
     }
+
+    /**
+     * When given an arraylist of 15 bits it tells you what the syndrom is for that list.
+     * @param hammingCode the arraylist of 15 bits you wish to check.
+     * @return the syndrome in the form of an arraylist.
+     */
+    public ArrayList<Integer> syndrome(ArrayList<Integer> hammingCode) {
+        ArrayList<Integer> syndrome = new ArrayList<>();
+
+
+        if(getParity8Sum(hammingCode)%2 != 0) {
+            syndrome.add(1);
+        } else {
+            syndrome.add(0);
+        }
+
+        if(getParity4Sum(hammingCode)%2 != 0) {
+            syndrome.add(1);
+        } else {
+            syndrome.add(0);
+        }
+
+        if(getParity2Sum(hammingCode)%2 != 0) {
+            syndrome.add(1);
+        } else {
+            syndrome.add(0);
+        }
+
+        if(getParity1Sum(hammingCode)%2 != 0) {
+            syndrome.add(1);
+        } else {
+            syndrome.add(0);
+        }
+
+        return syndrome;
+    }
+
+    /**
+     * decodes the syndrome to tell you which bit it refers to.
+     * @param syndrome the syndrome in the form of an arraylist.
+     * @return the integer the syndrome is referring to.
+     */
+    public int deCodeSyndrome(ArrayList<Integer> syndrome) {
+        int result = 0;
+        for (int bit : syndrome) {
+            // Shift result left by 1 and use bitwise OR to add the current bit
+            result = (result << 1) | bit;
+        }
+        return result;
+    }
+
+
+    /**
+     * decodes an arraylist of 15 bits using hamming code to give you the correct 11 bits of data that was supposed to be sent. This can't detect more than 1 bit flipped.
+     * @param hammingCode15Bit the arraylist of 15 bits that was received.
+     * @return the correct code that was supposed to be sent in the form of an arraylist of 11 bits.
+     */
+    public ArrayList<Integer> deCode11Bit(ArrayList<Integer> hammingCode15Bit) {
+        ArrayList<Integer> codeToReturn = new ArrayList<>();
+
+        correct15BitHammingCode(hammingCode15Bit);
+
+        codeToReturn.add(hammingCode15Bit.get(2));
+        for (int i = 4; i <= 6; i++) {
+            codeToReturn.add(hammingCode15Bit.get(i));
+        }
+        for (int i = 8; i < hammingCode15Bit.size(); i++) {
+            codeToReturn.add(hammingCode15Bit.get(i));
+        }
+
+        return codeToReturn;
+
+    }
+
+    /**
+     * Corrects and mistakes in an arraylist of 15 bits of data using hamming code. This code can't detect more than 1 bit flipped
+     * @param code The arraylist of 15 bits you wish to check
+     * @return the corrected arraylist of 15 bits.
+     */
+    public ArrayList<Integer> correct15BitHammingCode(ArrayList<Integer> code) {
+        ArrayList<Integer> syndrome = syndrome(code);
+        int intResultOfSyndrome = deCodeSyndrome(syndrome);
+
+        if (intResultOfSyndrome != 0) {
+            int indexErrorOccurred = intResultOfSyndrome - 1;
+            if (code.get(indexErrorOccurred) == 1) {
+                code.remove(indexErrorOccurred);
+                code.add(indexErrorOccurred, 0);
+            } else if (code.get(indexErrorOccurred) == 0) {
+                code.remove(indexErrorOccurred);
+                code.add(indexErrorOccurred, 1);
+            }
+        }
+        return code;
+    }
+
+
+
 }
